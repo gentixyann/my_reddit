@@ -8,6 +8,7 @@ class Pallete {
   static const whiteColor = Colors.white;
   static var redColor = Colors.red.shade500;
   static var blueColor = Colors.blue.shade300;
+  static const textBlackColor = Colors.black87;
 
   // Themes
   // ダークモード
@@ -33,16 +34,26 @@ class Pallete {
     scaffoldBackgroundColor: whiteColor,
     cardColor: greyColor,
     appBarTheme: const AppBarTheme(
-      backgroundColor: whiteColor,
-      elevation: 0,
-      iconTheme: IconThemeData(
-        color: blackColor,
-      ),
-    ),
+        backgroundColor: whiteColor,
+        elevation: 0,
+        iconTheme: IconThemeData(
+          color: blackColor,
+        ),
+        titleTextStyle: TextStyle(color: blackColor)),
     drawerTheme: const DrawerThemeData(
       backgroundColor: whiteColor,
     ),
     primaryColor: redColor,
     backgroundColor: whiteColor,
+    textTheme: const TextTheme(
+      headline6: TextStyle(
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+        color: textBlackColor,
+      ),
+      bodyText1: TextStyle(
+        color: textBlackColor,
+      ),
+    ),
   );
 }

@@ -29,8 +29,12 @@ class AuthRepository {
         _firestore = firestore,
         _googleSignIn = googleSignIn;
 
+// userコレクションを取得
   CollectionReference get _users =>
       _firestore.collection(FirebaseConstants.usersCollection);
+
+// ユーザーのサインイン状態 (サインインやサインアウトなど) の変更について通知
+  Stream<User?> get authStateChange => _auth.authStateChanges();
 
   FutureEither<UserModel> signInWithGoogle() async {
     try {
@@ -44,7 +48,6 @@ class AuthRepository {
 
       UserCredential userCredential =
           await _auth.signInWithCredential(credential);
-      print(userCredential.user?.email);
 
       UserModel userModel;
 
