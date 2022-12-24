@@ -41,26 +41,82 @@ class _MyAppState extends ConsumerState<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ref.watch(authStateChangeProvider).when(
-          data: (data) => MaterialApp.router(
-            debugShowCheckedModeBanner: false,
-            title: 'My Reddit',
-            theme: Pallete.lightModeAppTheme,
-            routerDelegate: RoutemasterDelegate(routesBuilder: (context) {
-              if (data != null) {
-                print(data.uid);
-                getData(ref, data);
-                if (userModel != null) {
-                  return loggedInRoute;
-                }
-              }
-              return loggedOutRoute;
-            }),
-            routeInformationParser: const RoutemasterParser(),
-            // home: const LoginScreen(),
-          ),
-          error: (error, stackTrace) => ErrorText(error: error.toString()),
-          loading: () => const Loader(),
-        );
+    User? user = FirebaseAuth.instance.currentUser;
+    return user == null
+        ? const Loader()
+        : ref.watch(authStateChangeProvider).when(
+              data: (data) => MaterialApp.router(
+                debugShowCheckedModeBanner: false,
+                title: 'My Reddit',
+                theme: Pallete.lightModeAppTheme,
+                routerDelegate: RoutemasterDelegate(routesBuilder: (context) {
+                  // if (user != null) {
+                  //   if (data != null) {
+                  //     getData(ref, data);
+                  //     if (userModel != null) {
+                  //       print(data);
+                  //       print('ログイン済み');
+                  //       return loggedInRoute;
+                  //     }
+                  //   }
+                  // }
+                  if (data != null) {
+                    getData(ref, data);
+                    if (userModel != null) {
+                      // print(userModel!.name);
+                      print('dataはnullじゃない');
+                      return loggedInRoute;
+                    }
+                  } else {
+                    print('dataはnull');
+                    return loggedOutRoute;
+                  }
+                  return loggedOutRoute;
+                }),
+                routeInformationParser: const RoutemasterParser(),
+                // home: const LoginScreen(),
+              ),
+              error: (error, stackTrace) => ErrorText(error: error.toString()),
+              loading: () => const Loader(),
+            );
   }
 }
+
+//   @override
+//   Widget build(BuildContext context) => MaterialApp(
+//         title: 'Flutter app',
+//         home: StreamBuilder<User?>(
+//           stream: FirebaseAuth.instance.authStateChanges(),
+//           builder: (context, snapshot) {
+//             if (snapshot.connectionState == ConnectionState.waiting) {
+//               // スプラッシュ画面などに書き換えても良い
+//               return const SizedBox();
+//             }
+//             if (snapshot.hasData) {
+//               // User が null でなない、つまりサインイン済みのホーム画面へ
+//               return HomePage();
+//             }
+//             // User が null である、つまり未サインインのサインイン画面へ
+//             return SignInPage();
+//           },
+//         ),
+//       );
+// }
+
+// class SignInPage extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) => const Scaffold(
+//         body: Center(
+//           child: Text('未サインイン時に表示するサインイン画面です。'),
+//         ),
+//       );
+// }
+
+// class HomePage extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) => const Scaffold(
+//         body: Center(
+//           child: Text('サインイン済み時に表示するホーム画面です。'),
+//         ),
+//       );
+// }

@@ -10,6 +10,8 @@ import 'package:my_reddit/core/providers/firebase_providers.dart';
 import 'package:my_reddit/core/type_defs.dart';
 import 'package:my_reddit/models/user_model.dart';
 
+// AuthRepositoryProviderを定義（ref.read を AuthRepository に渡す）
+// 不変な値のためreadでAuthRepositoryに渡している
 final authRepositoryProvider = Provider((ref) => AuthRepository(
       firestore: ref.read(firestoreProvider),
       auth: ref.read(authProvider),
@@ -36,9 +38,12 @@ class AuthRepository {
 // ユーザーのサインイン状態 (サインインやサインアウトなど) の変更について通知
   Stream<User?> get authStateChange => _auth.authStateChanges();
 
-  FutureEither<UserModel> signInWithGoogle() async {
+// Googleログイン
+  FutureEither<UserModel> signInWithGoogle(bool isFromLogin) async {
     try {
+      UserCredential userCredential;
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
       final googleAuth = await googleUser?.authentication;
 
       final credential = GoogleAuthProvider.credential(
@@ -46,11 +51,15 @@ class AuthRepository {
         idToken: googleAuth?.idToken,
       );
 
-      UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
+      if (isFromLogin) {
+        userCredential = await _auth.signInWithCredential(credential);
+      } else {
+        userCredential =
+            await _auth.currentUser!.linkWithCredential(credential);
+      }
 
       UserModel userModel;
-
+      // 初めてログインする場合
       if (userCredential.additionalUserInfo!.isNewUser) {
         userModel = UserModel(
           name: userCredential.user!.displayName ?? 'No Name',
@@ -72,6 +81,7 @@ class AuthRepository {
         );
         await _users.doc(userCredential.user!.uid).set(userModel.toMap());
       } else {
+        // 2回目以降のログインの場合
         userModel = await getUserData(userCredential.user!.uid).first;
       }
       return right(userModel);
